@@ -2,14 +2,14 @@ import Image from 'next/image'
 
 export function Header() {
   return (
-    <header className="bg-black flex justify-center items-center py-5 w-full h-48 absolute top-0 left-1">
+    <header className="flex flex-1 items-center justify-center py-20 px-2.5 bg-gray-700">
       <Image
         src="/logo.svg"
-        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32"
-        width={480}
-        height={480}
+        className="w-[126px] h-[48px]"
+        width={380}
+        height={380}
         quality={100}
-        alt=""
+        alt="Logo"
       />
     </header>
   )

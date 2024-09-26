@@ -1,93 +1,106 @@
 'use client'
-import { NewTask } from '@/app/components/form-task'
-import { Header } from '@/app/components/header'
-import { Post } from '@/app/components/post'
+
+import { PlusCircle } from '@phosphor-icons/react'
 import { useState } from 'react'
 
-interface Task {
+import { Header as ListHeader } from '@/app/components/list/header'
+import { Button } from '@/app/components/buttom'
+import { Input } from '@/app/components/input'
+import { Item } from '@/app/components/list/items'
+import { Empty } from '@/app/components/list/empty'
+import { Header } from '@/app/components/header'
+
+export interface ITask {
   id: number
-  content: string
-  completed: boolean
+  text: string
+  isChecked: boolean
 }
 
-const initialTasks: Task[] = [
-  { id: 1, content: 'Fazer compras', completed: false },
-  { id: 2, content: 'Limpar a casa', completed: false },
-  { id: 3, content: 'Estudar React', completed: false },
-]
-
-const initialCompletedTasks = 0
-
 export default function Home() {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks)
-  const [completedTasks, setCompletedTasks] = useState<number>(
-    initialCompletedTasks,
-  )
+  const [tasks, setTasks] = useState<ITask[]>([])
+  const [inputValue, setInputValue] = useState('')
 
-  function addTask(task: string) {
-    const newTask: Task = {
-      id: tasks.length + 1,
-      content: task,
-      completed: false,
+  const checkedTasksCounter = tasks.reduce((prevValue, currentTask) => {
+    if (currentTask.isChecked) {
+      return prevValue + 1
     }
-    setTasks([...tasks, newTask])
+    return prevValue
+  }, 0)
+
+  function handleAddTask() {
+    if (!inputValue) {
+      return
+    }
+
+    const newTask: ITask = {
+      id: new Date().getTime(),
+      text: inputValue,
+      isChecked: false,
+    }
+
+    setTasks((state) => [...state, newTask])
+    setInputValue('')
   }
 
-  function handleTaskCompletion(taskId: number) {
-    const updatedTasks = tasks.map((task) =>
-      task.id === taskId ? { ...task, completed: !task.completed } : task,
-    )
+  function handleRemoveTask(id: number) {
+    const filteredTasks = tasks.filter((task) => task.id !== id)
+
+    if (!confirm('Deseja mesmo apagar essa tarefa?')) {
+      return
+    }
+
+    setTasks(filteredTasks)
+  }
+
+  function handleToggleTask({ id, value }: { id: number; value: boolean }) {
+    const updatedTasks = tasks.map((task) => {
+      if (task.id === id) {
+        return { ...task, isChecked: value }
+      }
+      return task
+    })
+
     setTasks(updatedTasks)
-
-    const completedCount = updatedTasks.filter((task) => task.completed).length
-    setCompletedTasks(completedCount)
   }
-
-  function handleDeleteTask(tasksToDelete: Task) {
-    // Filtra as tarefas para remover a tarefa que está sendo deletada
-    const tasksWithoutDeleteOne = tasks.filter(
-      (task) => task.id !== tasksToDelete.id,
-    )
-    setTasks(tasksWithoutDeleteOne)
-
-    // Recalcula o número de tarefas concluídas com base nas tarefas restantes
-    const completedCount = tasksWithoutDeleteOne.filter(
-      (task) => task.completed,
-    ).length
-    setCompletedTasks(completedCount)
-  }
-
-  const countTask = tasks.length
 
   return (
-    <div>
+    <main className="">
       <Header />
-      <div>
-        <div>
-          <NewTask onAddTask={addTask} />
+
+      <section className="max-w-full w-full mx-auto">
+        <div className="flex flex-1 justify-center gap-2 mr-auto ml-auto max-w-[736px] max-h-[50px] z-10 -mt-8 mb-16">
+          <Input
+            onChange={(e) => setInputValue(e.target.value)}
+            value={inputValue}
+          />
+          <Button onClick={handleAddTask}>
+            Criar
+            <PlusCircle size={16} color="#f2f2f2" weight="bold" />
+          </Button>
         </div>
-        <main className="flex flex-col items-start p-0 gap-6 absolute w-[736px] h-[287px] left-1/2 transform -translate-x-1/2 top-[291px]">
-          <header className="flex justify-between items-center w-full">
-            <div className="font-inter font-bold leading-[17px] text-[#4EA8DE] whitespace-nowrap text-left flex-none order-0 flex-grow-0">
-              <span>Tarefas Criadas: {countTask}</span>
+
+        <div className="flex flex-col gap-6 max-w-[736px] mr-auto ml-auto">
+          <ListHeader
+            tasksCounter={tasks.length}
+            checkedTasksCounter={checkedTasksCounter}
+          />
+
+          {tasks.length > 0 ? (
+            <div className="flex flex-col gap-3">
+              {tasks.map((task) => (
+                <Item
+                  key={task.id}
+                  data={task}
+                  removeTask={handleRemoveTask}
+                  toggleTaskStatus={handleToggleTask}
+                />
+              ))}
             </div>
-            <aside className="font-inter font-bold leading-[17px] text-[#8284FA] whitespace-nowrap text-right flex-auto order-0 flex-grow-0">
-              <span>Concluídas: {completedTasks}</span>
-            </aside>
-          </header>
-          {tasks.map((task) => (
-            <Post
-              key={task.id}
-              post={{
-                id: task.id,
-                content: [{ type: 'text', content: task.content }],
-              }}
-              onTaskCompletion={handleTaskCompletion}
-              onDeleteTask={() => handleDeleteTask(task)}
-            />
-          ))}
-        </main>
-      </div>
-    </div>
+          ) : (
+            <Empty />
+          )}
+        </div>
+      </section>
+    </main>
   )
 }
