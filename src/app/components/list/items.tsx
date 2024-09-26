@@ -16,46 +16,51 @@ export function Item({ data, removeTask, toggleTaskStatus }: Props) {
     removeTask(data.id)
   }
 
-  const checkboxCheckedClassname = data.isChecked
-    ? 'border-purple-dark bg-purple-dark hover:border-purple hover:bg-purple'
-    : 'border-blue hover:bg-[rgba(30,111,159,0.2)]'
-  const paragraphCheckedClassname = data.isChecked
-    ? 'line-through text-gray-300'
-    : ''
-
   return (
-    <div className="flex flex-1 gap-3 items-center justify-between  rounded-lg bg-gray-500 border border-gray-400">
+    <div className="flex flex-1 gap-3 items-center justify-between p-4 rounded-lg bg-gray-500 border border-gray-400 w-[736px]">
       <div className="flex">
         <label
           htmlFor="checkbox"
           onClick={handleTaskToggle}
-          className="flex items-center gap-3 p-1"
+          className="flex items-center gap-3 p-1 cursor-pointer"
         >
+          {/* Hidden checkbox */}
           <input
             readOnly
             type="checkbox"
             checked={data.isChecked}
             className="hidden"
           />
-          <span
-            className={`flex items-center justify-center rounded-full h-4.5 w-4.5 transition-all ${checkboxCheckedClassname}`}
-          >
-            {data.isChecked && <Check size={12} />}
-          </span>
 
+          {/* Custom checkbox */}
+          <div
+            className={`flex items-center justify-center rounded-full h-5 w-5 transition-all border ${
+              data.isChecked
+                ? 'bg-purple-dark border-purple-dark hover:bg-purple hover:border-purple'
+                : 'bg-transparent border-blue hover:bg-[rgba(30,111,159,0.2)]'
+            }`}
+          >
+            {/* Show check icon only if the task is checked */}
+            {data.isChecked && <Check size={12} color="#ffffff" />}
+          </div>
+
+          {/* Task text */}
           <p
-            className={`text-sm leading-tight select-none transition-all ${paragraphCheckedClassname}`}
+            className={`text-sm leading-tight select-none transition-all ${
+              data.isChecked ? 'line-through text-gray-300' : ''
+            }`}
           >
             {data.text}
           </p>
         </label>
       </div>
 
+      {/* Remove button */}
       <button
         onClick={handleRemove}
-        className="border-none bg-transparent rounded-md p-1 transition-colors hover:bg-gray-400"
+        className="border-none bg-transparent rounded-md p-1 transition-colors hover:bg-red-400"
       >
-        <Trash size={16} color="#808080" />
+        <Trash size={16} color="#ffffff" />
       </button>
     </div>
   )
